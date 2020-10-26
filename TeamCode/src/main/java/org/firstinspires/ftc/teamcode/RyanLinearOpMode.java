@@ -41,24 +41,21 @@ import com.qualcomm.robotcore.util.Range;
  * the autonomous or the teleop period of an FTC match. The names of OpModes appear on the menu
  * of the FTC Driver Station. When an selection is made from the menu, the corresponding OpMode
  * class is instantiated on the Robot Controller and executed.
- * <p>
+ *
  * This particular OpMode just executes a basic Tank Drive Teleop for a two wheeled robot
  * It includes all the skeletal structure that all linear OpModes contain.
- * <p>
+ *
  * Use Android Studios to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name = "Basic: Linear potato", group = "Linear Opmode")
-public class BasicOpMode_ryker extends LinearOpMode {
+@TeleOp(name="Ryan Test", group="Ryan's Group")
+public class RyanLinearOpMode extends LinearOpMode {
 
     // Declare OpMode members.
-    ;
     private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor leftFrontDrive = null;
-    private DcMotor rightFrontDrive = null;
-    private DcMotor leftBackeDrive = null;
-    private DcMotor rightBackeDrive = null;
+    private DcMotor leftDrive = null;
+    private DcMotor rightDrive = null;
 
     @Override
     public void runOpMode() {
@@ -68,20 +65,14 @@ public class BasicOpMode_ryker extends LinearOpMode {
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
-        leftFrontDrive = hardwareMap.get(DcMotor.class, "leftFront");
-        rightFrontDrive = hardwareMap.get(DcMotor.class, "rightFront");
-        leftBackeDrive = hardwareMap.get(DcMotor.class, "leftBack");
-        rightBackeDrive = hardwareMap.get(DcMotor.class, "rightBack");
+        leftDrive  = hardwareMap.get(DcMotor.class, "leftBack");
+        rightDrive = hardwareMap.get(DcMotor.class, "rightBack");
+
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
-        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-        leftBackeDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightBackeDrive.setDirection(DcMotor.Direction.FORWARD);
-//leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-//        rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-//        leftBackeDrive.setDirection(DcMotor.Direction.FORWARD);
-//        rightBackeDrive.setDirection(DcMotor.Direction.REVERSE);
+        leftDrive.setDirection(DcMotor.Direction.FORWARD);
+        rightDrive.setDirection(DcMotor.Direction.REVERSE);
+
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
@@ -93,35 +84,24 @@ public class BasicOpMode_ryker extends LinearOpMode {
             double leftPower;
             double rightPower;
 
-            // Choose to drive using either Tank Mode, or POV Modev
+            // Choose to drive using either Tank Mode, or POV Mode
             // Comment out the method that's not used.  The default below is POV.
 
             // POV Mode uses left stick to go forward, and right stick to turn.
             // - This uses basic math to combine motions and is easier to drive straight.
             double drive = -gamepad1.left_stick_y;
-            double turn = gamepad1.left_stick_x;
-            leftPower = Range.clip(drive + turn, -1.0, 1.0);
-            rightPower = Range.clip(drive - turn, -1.0, 1.0);
-            if (gamepad1.a) {
-                // move to 90 degrees.
-                for (int i=0; i < 200; i=i+1)  {
+            double turn  =  gamepad1.right_stick_x;
+            leftPower    = Range.clip(drive + turn, -1.0, 1.0) ;
+            rightPower   = Range.clip(drive - turn, -1.0, 1.0) ;
 
-                    leftFrontDrive.setPower(1);
-                    rightFrontDrive.setPower(-1);
-                    leftBackeDrive.setPower(1);
-                    rightBackeDrive.setPower(-1);
-                }
-            }
             // Tank Mode uses one stick to control each wheel.
             // - This requires no math, but it is hard to drive forward slowly and keep straight.
             // leftPower  = -gamepad1.left_stick_y ;
             // rightPower = -gamepad1.right_stick_y ;
 
             // Send calculated power to wheels
-            leftFrontDrive.setPower(leftPower);
-            rightFrontDrive.setPower(rightPower);
-            leftBackeDrive.setPower(leftPower);
-            rightBackeDrive.setPower(rightPower);
+            leftDrive.setPower(leftPower);
+            rightDrive.setPower(rightPower);
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
