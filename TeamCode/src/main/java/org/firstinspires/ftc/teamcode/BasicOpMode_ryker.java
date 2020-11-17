@@ -36,9 +36,10 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 
+
 /**
  * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
- * the autonomous or the teleop period of an FTC match. The names of OpModes appear on the menu
+ * the autosnomous or the teleop period of an FTC match. The names of OpModes appear on the menu
  * of the FTC Driver Station. When an selection is made from the menu, the corresponding OpMode
  * class is instantiated on the Robot Controller and executed.
  * <p>
@@ -93,6 +94,12 @@ public class BasicOpMode_ryker extends LinearOpMode {
             double leftPower;
             double rightPower;
 
+            double rightStickY = -gamepad1.right_stick_x;
+
+            rightFrontDrive.setPower(-rightStickY);
+           rightBackeDrive.setPower(rightStickY);
+            leftFrontDrive.setPower(-rightStickY);
+            leftBackeDrive.setPower(rightStickY);
             // Choose to drive using either Tank Mode, or POV Modev
             // Comment out the method that's not used.  The default below is POV.
 
@@ -101,30 +108,31 @@ public class BasicOpMode_ryker extends LinearOpMode {
             double drive = -gamepad1.left_stick_y;
             double turn = gamepad1.left_stick_x;
             leftPower = Range.clip(drive + turn, -1.0, 1.0);
-            rightPower = Range.clip(drive - turn, -1.0, 1.0);
-            if (gamepad1.a) {
-                // move to 90 degrees.
-                for (int i=0; i < 200; i=i+1)  {
+            rightPower = Range.clip(drive - turn, -1.0, 1.0);//dfi ghoi;dxfyxiugydtfuyiugryduirhyfgfuipfxdiu rgtfgiuyf8tgetrjd9fgcyug8hgiufdtftiuh8ugre;iufgiuhfugiuxhihfdiufsfijgfdhi
 
-                    leftFrontDrive.setPower(1);
-                    rightFrontDrive.setPower(-1);
-                    leftBackeDrive.setPower(1);
-                    rightBackeDrive.setPower(-1);
-                }
-            }
+//            if (gamepad1.a) {
+//                // move to 90 degrees.
+//                for (int i=0; i < 200; i=i+1)  {
+//
+//                    leftFrontDrive.setPower(1);
+//                    rightFrontDrive.setPower(-1);
+//                    leftBackeDrive.setPower(1);
+//                    rightBackeDrive.setPower(-1);
+//                }
+//            }
             // Tank Mode uses one stick to control each wheel.
             // - This requires no math, but it is hard to drive forward slowly and keep straight.
             // leftPower  = -gamepad1.left_stick_y ;
             // rightPower = -gamepad1.right_stick_y ;
 
             // Send calculated power to wheels
-            leftFrontDrive.setPower(leftPower);
-            rightFrontDrive.setPower(rightPower);
-            leftBackeDrive.setPower(leftPower);
-            rightBackeDrive.setPower(rightPower);
+            //leftFrontDrive.setPower(leftPower);
+            //rightFrontDrive.setPower(rightPower);
+            //leftBackeDrive.setPower(leftPower);
+            //rightBackeDrive.setPower(rightPower);
 
             // Show the elapsed game time and wheel power.
-            telemetry.addData("Status", "Run Time: " + runtime.toString());
+            telemetry.addData("Status", "Run Time: " + runtime.toString() + "RightY :" + gamepad1.right_stick_y + "RightX :" + gamepad1.right_stick_x);
             telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
             telemetry.update();
         }
