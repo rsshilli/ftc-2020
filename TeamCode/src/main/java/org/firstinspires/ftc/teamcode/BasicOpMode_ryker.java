@@ -75,14 +75,11 @@ public class BasicOpMode_ryker extends LinearOpMode {
         rightBackeDrive = hardwareMap.get(DcMotor.class, "rightBack");
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
-        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+        leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         leftBackeDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightBackeDrive.setDirection(DcMotor.Direction.FORWARD);
-//leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-//        rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-//        leftBackeDrive.setDirection(DcMotor.Direction.FORWARD);
-//        rightBackeDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightBackeDrive.setDirection(DcMotor.Direction.REVERSE);
+
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
@@ -91,24 +88,27 @@ public class BasicOpMode_ryker extends LinearOpMode {
         while (opModeIsActive()) {
 
             // Setup a variable for each drive wheel to save power level for telemetry
-            double leftPower;
-            double rightPower;
+            double leftFrontPower;
+            double rightBackPower;
+            double leftBackPower;
+            double rightFrontPower;
+           // helloMyNameIsBob
+            double rightStickX = gamepad1.right_stick_x;
 
-            double rightStickY = -gamepad1.right_stick_x;
-
-            rightFrontDrive.setPower(-rightStickY);
-           rightBackeDrive.setPower(rightStickY);
-            leftFrontDrive.setPower(-rightStickY);
-            leftBackeDrive.setPower(rightStickY);
-            // Choose to drive using either Tank Mode, or POV Modev
-            // Comment out the method that's not used.  The default below is POV.
-
-            // POV Mode uses left stick to go forward, and right stick to turn.
+            // The left stick Is for forward, backward,  and to turn the robot's front.
             // - This uses basic math to combine motions and is easier to drive straight.
             double drive = -gamepad1.left_stick_y;
             double turn = gamepad1.left_stick_x;
-            leftPower = Range.clip(drive + turn, -1.0, 1.0);
-            rightPower = Range.clip(drive - turn, -1.0, 1.0);//dfi ghoi;dxfyxiugydtfuyiugryduirhyfgfuipfxdiu rgtfgiuyf8tgetrjd9fgcyug8hgiufdtftiuh8ugre;iufgiuhfugiuxhihfdiufsfijgfdhi
+            leftFrontPower = Range.clip(drive + turn - rightStickX, -1.0, 1.0);            //
+            leftBackPower = Range.clip(drive + turn + rightStickX, -1.0, 1.0);
+            rightFrontPower = Range.clip(drive - turn - rightStickX, -1.0, 1.0);
+            rightBackPower = Range.clip(drive - turn + rightStickX, -1.0, 1.0);
+
+            // Send calculated power to wheels
+            leftFrontDrive.setPower(leftFrontPower);
+            rightFrontDrive.setPower(rightFrontPower);
+            leftBackeDrive.setPower(leftBackPower);
+            rightBackeDrive.setPower(rightBackPower);
 
 //            if (gamepad1.a) {
 //                // move to 90 degrees.
@@ -120,17 +120,6 @@ public class BasicOpMode_ryker extends LinearOpMode {
 //                    rightBackeDrive.setPower(-1);
 //                }
 //            }
-            // Tank Mode uses one stick to control each wheel.
-            // - This requires no math, but it is hard to drive forward slowly and keep straight.
-            // leftPower  = -gamepad1.left_stick_y ;
-            // rightPower = -gamepad1.right_stick_y ;
-
-            // Send calculated power to wheels
-            //leftFrontDrive.setPower(leftPower);
-            //rightFrontDrive.setPower(rightPower);
-            //leftBackeDrive.setPower(leftPower);
-            //rightBackeDrive.setPower(rightPower);
-
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString() + "RightY :" + gamepad1.right_stick_y + "RightX :" + gamepad1.right_stick_x);
             telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
