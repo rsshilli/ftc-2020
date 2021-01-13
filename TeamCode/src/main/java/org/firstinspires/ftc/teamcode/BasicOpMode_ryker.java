@@ -36,7 +36,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 
-
 /**
  * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
  * the autosnomous or the teleop period of an FTC match. The names of OpModes appear on the menu
@@ -60,6 +59,7 @@ public class BasicOpMode_ryker extends LinearOpMode {
     private DcMotor rightFrontDrive = null;
     private DcMotor leftBackeDrive = null;
     private DcMotor rightBackeDrive = null;
+    private DcMotor intake = null;
 
     @Override
     public void runOpMode() {
@@ -69,17 +69,18 @@ public class BasicOpMode_ryker extends LinearOpMode {
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
-        leftFrontDrive = hardwareMap.get(DcMotor.class, "leftFront");
-        rightFrontDrive = hardwareMap.get(DcMotor.class, "rightFront");
-        leftBackeDrive = hardwareMap.get(DcMotor.class, "leftBack");
-        rightBackeDrive = hardwareMap.get(DcMotor.class, "rightBack");
+        leftFrontDrive = hardwareMap.get(DcMotor.class, "leftFront");  // motor 2
+        rightFrontDrive = hardwareMap.get(DcMotor.class, "rightFront"); // motor 3
+        leftBackeDrive = hardwareMap.get(DcMotor.class, "leftBack"); // motor 0
+        rightBackeDrive = hardwareMap.get(DcMotor.class, "rightBack"); // motor 1
+        intake = hardwareMap.get(DcMotor.class, "intake"); // motor 1
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
         leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         leftBackeDrive.setDirection(DcMotor.Direction.REVERSE);
         rightBackeDrive.setDirection(DcMotor.Direction.REVERSE);
-
+        intake.setDirection(DcMotor.Direction.FORWARD);
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
@@ -92,7 +93,8 @@ public class BasicOpMode_ryker extends LinearOpMode {
             double rightBackPower;
             double leftBackPower;
             double rightFrontPower;
-           // helloMyNameIsBob
+            double intakePower;
+            // helloMyNameIsBob
             double rightStickX = gamepad1.right_stick_x;
 
             // The left stick Is for forward, backward,  and to turn the robot's front.
@@ -103,17 +105,17 @@ public class BasicOpMode_ryker extends LinearOpMode {
             leftBackPower = Range.clip(drive + turn + rightStickX, -1.0, 1.0);
             rightFrontPower = Range.clip(drive - turn - rightStickX, -1.0, 1.0);
             rightBackPower = Range.clip(drive - turn + rightStickX, -1.0, 1.0);
-
+            // someVariable = 1 < 0 ? answerIfTrue : answerIfFalse;
+            double leftBumperPower = gamepad1.left_bumper ? 1 : 0;
+            intakePower = Range.clip(gamepad1.left_trigger - leftBumperPower, -1.0, 1.0);
             // Send calculated power to wheels
             leftFrontDrive.setPower(leftFrontPower);
             rightFrontDrive.setPower(rightFrontPower);
             leftBackeDrive.setPower(leftBackPower);
             rightBackeDrive.setPower(rightBackPower);
 
-//            if (gamepad1.a) {
-//                // move to 90 degrees.
-//                for (int i=0; i < 200; i=i+1)  {
-//
+//                // intake
+            intake.setPower(intakePower);
 //                    leftFrontDrive.setPower(1);
 //                    rightFrontDrive.setPower(-1);
 //                    leftBackeDrive.setPower(1);
@@ -122,7 +124,7 @@ public class BasicOpMode_ryker extends LinearOpMode {
 //            }
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString() + "RightY :" + gamepad1.right_stick_y + "RightX :" + gamepad1.right_stick_x);
-            telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
+            telemetry.addData("Motors", "left (%.2f), right (%.2f), leftt (%.2f)", leftFrontPower, rightFrontPower, gamepad1.left_trigger);
             telemetry.update();
         }
     }
