@@ -32,6 +32,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -60,7 +61,7 @@ public class BasicOpMode_ryker extends LinearOpMode {
     private DcMotor leftBackeDrive = null;
     private DcMotor rightBackeDrive = null;
     private DcMotor intake = null;
-
+    private DcMotor outtake = null;
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
@@ -74,6 +75,7 @@ public class BasicOpMode_ryker extends LinearOpMode {
         leftBackeDrive = hardwareMap.get(DcMotor.class, "leftBack"); // motor 0
         rightBackeDrive = hardwareMap.get(DcMotor.class, "rightBack"); // motor 1
         intake = hardwareMap.get(DcMotor.class, "intake"); // motor 1
+        outtake = hardwareMap.get(DcMotor.class, "outtake"); // motor 1
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
         leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
@@ -81,6 +83,7 @@ public class BasicOpMode_ryker extends LinearOpMode {
         leftBackeDrive.setDirection(DcMotor.Direction.REVERSE);
         rightBackeDrive.setDirection(DcMotor.Direction.REVERSE);
         intake.setDirection(DcMotor.Direction.FORWARD);
+        outtake.setDirection(DcMotor.Direction.REVERSE);
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
@@ -94,6 +97,7 @@ public class BasicOpMode_ryker extends LinearOpMode {
             double leftBackPower;
             double rightFrontPower;
             double intakePower;
+            double outtakePower;
             // helloMyNameIsBob
             double rightStickX = gamepad1.right_stick_x;
 
@@ -108,6 +112,7 @@ public class BasicOpMode_ryker extends LinearOpMode {
             // someVariable = 1 < 0 ? answerIfTrue : answerIfFalse;
             double leftBumperPower = gamepad1.left_bumper ? 1 : 0;
             intakePower = Range.clip(gamepad1.left_trigger - leftBumperPower, -1.0, 1.0);
+            outtakePower = Range.clip(gamepad1.right_trigger, -1.0, 1.0);
             // Send calculated power to wheels
             leftFrontDrive.setPower(leftFrontPower);
             rightFrontDrive.setPower(rightFrontPower);
@@ -116,6 +121,7 @@ public class BasicOpMode_ryker extends LinearOpMode {
 
 //                // intake
             intake.setPower(intakePower);
+            outtake.setPower(outtakePower);
 //                    leftFrontDrive.setPower(1);
 //                    rightFrontDrive.setPower(-1);
 //                    leftBackeDrive.setPower(1);
@@ -124,7 +130,7 @@ public class BasicOpMode_ryker extends LinearOpMode {
 //            }
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString() + "RightY :" + gamepad1.right_stick_y + "RightX :" + gamepad1.right_stick_x);
-            telemetry.addData("Motors", "left (%.2f), right (%.2f), leftt (%.2f)", leftFrontPower, rightFrontPower, gamepad1.left_trigger);
+            telemetry.addData("Motors", "left (%.2f), right (%.2f), leftt (%.2f) outtake (%.2f)", leftFrontPower, rightFrontPower, gamepad1.left_trigger, outtakePower);
             telemetry.update();
         }
     }

@@ -27,19 +27,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.robotcontroller.external.samples;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
+import java.util.List;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection;
-import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
-
-import java.util.List;
+import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 
 /**
  * This 2020-2021 OpMode illustrates the basics of using the TensorFlow Object Detection API to
@@ -52,6 +50,7 @@ import java.util.List;
  * is explained below.
  */
 @TeleOp(name = "Concept: TensorFlow Object Detection", group = "Concept")
+@Disabled
 public class ConceptTensorFlowObjectDetection extends LinearOpMode {
     private static final String TFOD_MODEL_ASSET = "UltimateGoal.tflite";
     private static final String LABEL_FIRST_ELEMENT = "Quad";
@@ -70,7 +69,7 @@ public class ConceptTensorFlowObjectDetection extends LinearOpMode {
      * and paste it in to your code on the next line, between the double quotes.
      */
     private static final String VUFORIA_KEY =
-            "AWz6j8L/////AAABmRKkIryTuktLi2mFvZqqaeBDZF67S0ewoDJGMGD7nMiS/el/YAB4BDMhHU9CLQpwfj9cEEkSYB9pZgtsyWTg9q+koX/OUS9w1fDUD2O/ZgUHqvquZ3DgZe+HpsRa3ZcFslOjrqxWO/A7tEYFSJi0OZYLKVD9duT6zYq2OUiT4NJbESkRJvEk0HKmOzIwW395Ujv1uVVxgfaEdIDp4RdMhdI7Fl+ZZ+yKbnoDSnVw/UZHKSg6S/2ZclKQTPZpBmR7wJJp0y4CoSjZZhaukcNSCvsUB6Glr6WajtHP5qDooeWVjmsGi6RRol4h/QlV2sFrLv4ueJS6DPAnOn7oZ9CCeWYavv9cLTYvi6tDB6MuTOsm";
+            " -- YOUR NEW VUFORIA KEY GOES HERE  --- ";
 
     /**
      * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
