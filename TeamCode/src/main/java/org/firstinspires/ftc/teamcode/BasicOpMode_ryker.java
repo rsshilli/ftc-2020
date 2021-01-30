@@ -62,6 +62,7 @@ public class BasicOpMode_ryker extends LinearOpMode {
     private DcMotor rightBackeDrive = null;
     private DcMotor intake = null;
     private DcMotor outtake = null;
+
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
@@ -78,10 +79,10 @@ public class BasicOpMode_ryker extends LinearOpMode {
         outtake = hardwareMap.get(DcMotor.class, "outtake"); // motor 1
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
-        leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         leftBackeDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightBackeDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightBackeDrive.setDirection(DcMotor.Direction.FORWARD);
         intake.setDirection(DcMotor.Direction.FORWARD);
         outtake.setDirection(DcMotor.Direction.REVERSE);
         // Wait for the game to start (driver presses PLAY)
@@ -99,20 +100,23 @@ public class BasicOpMode_ryker extends LinearOpMode {
             double intakePower;
             double outtakePower;
             // helloMyNameIsBob
-            double rightStickX = gamepad1.right_stick_x;
+            double strafe = gamepad1.left_stick_x;
 
             // The left stick Is for forward, backward,  and to turn the robot's front.
             // - This uses basic math to combine motions and is easier to drive straight.
             double drive = -gamepad1.left_stick_y;
-            double turn = gamepad1.left_stick_x;
-            leftFrontPower = Range.clip(drive + turn - rightStickX, -1.0, 1.0);            //
-            leftBackPower = Range.clip(drive + turn + rightStickX, -1.0, 1.0);
-            rightFrontPower = Range.clip(drive - turn - rightStickX, -1.0, 1.0);
-            rightBackPower = Range.clip(drive - turn + rightStickX, -1.0, 1.0);
+            double turn = gamepad1.right_stick_x;
+            leftFrontPower = Range.clip(drive + turn - strafe, -1.0, 1.0);            //
+            leftBackPower = Range.clip(drive + turn + strafe, -1.0, 1.0);
+            rightFrontPower = Range.clip(drive - turn + strafe, -1.0, 1.0);
+            rightBackPower = Range.clip(drive - turn - strafe, -1.0, 1.0);
             // someVariable = 1 < 0 ? answerIfTrue : answerIfFalse;
             double leftBumperPower = gamepad1.left_bumper ? 1 : 0;
+            double rightBumperPower = gamepad1.right_bumper ? 1 : 0;
             intakePower = Range.clip(gamepad1.left_trigger - leftBumperPower, -1.0, 1.0);
-            outtakePower = Range.clip(gamepad1.right_trigger, -1.0, 1.0);
+            outtakePower = Range.clip(gamepad1.right_trigger - rightBumperPower, -1.0, 1.0);
+
+            
             // Send calculated power to wheels
             leftFrontDrive.setPower(leftFrontPower);
             rightFrontDrive.setPower(rightFrontPower);
