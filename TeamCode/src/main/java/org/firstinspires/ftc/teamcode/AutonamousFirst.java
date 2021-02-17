@@ -28,6 +28,7 @@ public class AutonamousFirst extends LinearOpMode {
     private DcMotor rightBackeDrive = null;
     private DcMotor intake = null;
     private DcMotor outtake = null;
+    private int numberOfRings;
     private static final String TFOD_MODEL_ASSET = "UltimateGoal.tflite";
     private static final String LABEL_FIRST_ELEMENT = "Quad";
     private static final String LABEL_SECOND_ELEMENT = "Single";
@@ -107,29 +108,32 @@ public class AutonamousFirst extends LinearOpMode {
         telemetry.update();
 
 
-        // set both motors to 25% power.
-        int numberOfRings = lookToFindRings();
-        driveit(.1, .1,
-                .1, .1, 7000);
+        // set both motors to 25% power
+         numberOfRings = lookToFindRings();
+        driveit(.5, .5,
+                .5, .5, 1400);
 
         //look to find rings
         if (numberOfRings == 0 || numberOfRings == 4) {
-            driveit(.2, -.2,
-                    .2, -.2, 16000);
             if (numberOfRings == 0) {
-
-                driveit(1.0, 1.0,
-                        1.0, 1.0, 600);
-                driveit(.10, .10,
-                        .10, .10, 1000);
+                driveit(1.0, .0,
+                        1.0, 1.0, 800);
+                //realeasre thew wobwle here
+                        driveit(.01,.01,
+                                .01,.01,1000);
                 driveit(-1.0, 1.0,
-                        -1.0, 1.0, 700);
-                driveit(1.2, 1.2,
-                        1.2, 1.2, 200);
+                        -1.0, 1.0, 1000);
+                //raiss arm so we dont hit tyhe woble
+                driveit(.01,.01,
+                        .01,.01,1000);
+                driveit(-1.,-1.,
+                        -1.,-1.,1900);
+                //pick up the woblle
+                driveit(.01,.01,
+                        .01,.01,1000);
+                driveit(1.,-1,
+                        1, -1.,1400);
             } else {
-
-
-
 
                 driveit(1.0, 1.0,
                         1.0, 1.0, 1850);
@@ -142,7 +146,7 @@ public class AutonamousFirst extends LinearOpMode {
             driveit(.175, -.175,
                     .175, -.175, 4050);
             driveit(.99, .99,
-                    .99, .99, 1250);
+                     .99, .99, 1250);
 
         }
 
@@ -197,7 +201,7 @@ public class AutonamousFirst extends LinearOpMode {
             rightFrontDrive.setPower(rightfrontpower);
             rightBackeDrive.setPower(rightbackpower);
 
-            telemetry.addData(String.format("Driving for %d", sleepTime), " (%.03f , %.03f, %.03f , %.03f)",
+            telemetry.addData(String.format( "found %d rings Driving for %d ",numberOfRings, sleepTime), " (%.03f , %.03f, %.03f , %.03f)",
                     leftfrontpower, rightfrontpower, leftbackpower, rightbackpower);
             telemetry.update();
 
