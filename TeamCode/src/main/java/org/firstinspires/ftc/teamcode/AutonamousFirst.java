@@ -10,6 +10,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.Came
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.Range;
+
 import java.util.Date;
 import java.util.List;
 // simple autonomous program that drives bot forward 2 seconds then ends.
@@ -28,11 +31,14 @@ public class AutonamousFirst extends LinearOpMode {
     private DcMotor rightBackeDrive = null;
     private DcMotor intake = null;
     private DcMotor outtake = null;
+    private Servo armServo = null;
+    private Servo gripServo = null;
     private int numberOfRings;
     private static final String TFOD_MODEL_ASSET = "UltimateGoal.tflite";
     private static final String LABEL_FIRST_ELEMENT = "Quad";
     private static final String LABEL_SECOND_ELEMENT = "Single";
-
+    double armPosition, gripPosition;
+    double minPosition = 0, maxPosition = 1;
     /*
      * IMPORTANT: You need to obtain your own license key to use Vuforia. The string below with which
      * 'parameters.vuforiaLicenseKey' is initialized is for illustration only, and will not function.
@@ -69,6 +75,8 @@ public class AutonamousFirst extends LinearOpMode {
         rightBackeDrive = hardwareMap.get(DcMotor.class, "rightBack"); // motor 1
         intake = hardwareMap.get(DcMotor.class, "intake"); // motor 1
         outtake = hardwareMap.get(DcMotor.class, "outtake"); // motor 1
+        armServo = hardwareMap.servo.get("arm_servo");
+        gripServo = hardwareMap.servo.get("grip_servo");
 
         leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
@@ -91,7 +99,7 @@ public class AutonamousFirst extends LinearOpMode {
             // The TensorFlow software will scale the input images from the camera to a lower resolution.
             // This can result in lower detection accuracy at longer distances (> 55cm or 22").
             // If your target is at distance greater than 50 cm (20") you can adjust the magnification value
-            // to artificially zoom in to the center of image.  For best results, the "aspectRatio" argument
+            //- to artificially zoom in to the center of image.  For best results, the "aspectRatio" argument
             // should be set to the value of the images used to create the TensorFlow Object Detection model
             // (typically 16/9).
             tfod.setZoom(2.5, 16.0 / 9.0);
@@ -109,7 +117,7 @@ public class AutonamousFirst extends LinearOpMode {
 
 
         // set both motors to 25% power
-         numberOfRings = lookToFindRings();
+        numberOfRings = lookToFindRings();
         driveit(.5, .5,
                 .5, .5, 1400);
 
@@ -119,20 +127,27 @@ public class AutonamousFirst extends LinearOpMode {
                 driveit(1.0, .0,
                         1.0, 1.0, 800);
                 //realeasre thew wobwle here
-                        driveit(.01,.01,
-                                .01,.01,1000);
+                ServoPositon(1,1);
+                ServoPositon(1,0);
+                driveit(.01, .01,
+                        .01, .01, 1000);
                 driveit(-1.0, 1.0,
                         -1.0, 1.0, 1000);
                 //raiss arm so we dont hit tyhe woble
-                driveit(.01,.01,
-                        .01,.01,1000);
-                driveit(-1.,-1.,
-                        -1.,-1.,1900);
+                ServoPositon(.5,0);
+                driveit(.01, .01,
+                        .01, .01, 1000);
+                driveit(-1., -1.,
+                        -1., -1., 1900);
                 //pick up the woblle
-                driveit(.01,.01,
-                        .01,.01,1000);
-                driveit(1.,-1,
-                        1, -1.,1400);
+                ServoPositon(1,0);
+                driveit(.01, .01,
+                        .01, .01, 1000);
+                ServoPositon(1,1);
+                driveit(.01, .01,
+                        .01, .01, 1000);
+                driveit(1., -1,
+                        1, -1., 1400);
             } else {
 
                 driveit(1.0, 1.0,
@@ -146,7 +161,7 @@ public class AutonamousFirst extends LinearOpMode {
             driveit(.175, -.175,
                     .175, -.175, 4050);
             driveit(.99, .99,
-                     .99, .99, 1250);
+                    .99, .99, 1250);
 
         }
 
@@ -192,6 +207,13 @@ public class AutonamousFirst extends LinearOpMode {
         return numberOfRings;
     }
 
+    private void ServoPositon(double armPosition, double gripPosition) {
+        if (opModeIsActive()) {
+            armServo.setPosition(Range.clip(armPosition, minPosition, maxPosition));
+            gripServo.setPosition(Range.clip(gripPosition, minPosition, maxPosition));
+        }
+    }
+
     private void driveit(double leftfrontpower, double leftbackpower,
                          double rightfrontpower, double rightbackpower, long sleepTime) {
         if (opModeIsActive()) {
@@ -201,7 +223,7 @@ public class AutonamousFirst extends LinearOpMode {
             rightFrontDrive.setPower(rightfrontpower);
             rightBackeDrive.setPower(rightbackpower);
 
-            telemetry.addData(String.format( "found %d rings Driving for %d ",numberOfRings, sleepTime), " (%.03f , %.03f, %.03f , %.03f)",
+            telemetry.addData(String.format("found %d rings Driving for %d ", numberOfRings, sleepTime), " (%.03f , %.03f, %.03f , %.03f)",
                     leftfrontpower, rightfrontpower, leftbackpower, rightbackpower);
             telemetry.update();
 
@@ -214,6 +236,7 @@ public class AutonamousFirst extends LinearOpMode {
 //        rightFrontDrive.setPower(0.0);
 //        rightBackeDrive.setPower(0.0);
         }
+
     }
 
     /**
