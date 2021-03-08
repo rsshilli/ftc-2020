@@ -115,10 +115,10 @@ public class BasicOpMode_ryker extends LinearOpMode {
             // - This uses basic math to combine motions and is easier to drive straight.
             double drive = -gamepad1.left_stick_y;
             double turn = gamepad1.right_stick_x;
-            if (gamepad1.dpad_left && armPosition < MAX_POSITION) armPosition += .01;
-            if (gamepad1.dpad_right && armPosition > MIN_POSITION) armPosition -= .01;
-            if (gamepad1.dpad_up && gripPosition < MAX_POSITION) gripPosition = gripPosition + .01;
-            if (gamepad1.dpad_down && gripPosition > MIN_POSITION) gripPosition = gripPosition - .01;
+            if (gamepad1.dpad_left && armPosition < MAX_POSITION) armPosition = armPosition + .001;
+            if (gamepad1.dpad_right && armPosition > MIN_POSITION) armPosition = armPosition - .001;
+            if (gamepad1.dpad_up && gripPosition < MAX_POSITION) gripPosition = gripPosition + .001;
+            if (gamepad1.dpad_down && gripPosition > MIN_POSITION) gripPosition = gripPosition - .001;
             leftFrontPower = Range.clip(drive + turn - strafe, -1.0, 1.0);            //
             leftBackPower = Range.clip(drive + turn + strafe, -1.0, 1.0);
             rightFrontPower = Range.clip(drive - turn + strafe, -1.0, 1.0);
