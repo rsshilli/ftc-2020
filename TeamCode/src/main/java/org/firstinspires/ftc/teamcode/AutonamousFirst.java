@@ -12,6 +12,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
+import com.vuforia.Vuforia;
 
 import java.util.Date;
 import java.util.List;
@@ -38,14 +39,15 @@ public class AutonamousFirst extends LinearOpMode {
     private static final String LABEL_FIRST_ELEMENT = "Quad";
     private static final String LABEL_SECOND_ELEMENT = "Single";
     double armPosition, gripPosition;
-    double minPosition = 0, maxPosition = 1;
+    double minPosition = 0, maxPosition = .7;
+    double MIN_GRIP= 0.08, MAX_GRIP = .5;
     /*
      * IMPORTANT: You need to obtain your own license key to use Vuforia. The string below with which
      * 'parameters.vuforiaLicenseKey' is initialized is for illustration only, and will not function.
      * A Vuforia 'Development' license key, can be obtained free of charge from the Vuforia developer
      * web site at https://developer.vuforia.com/license-manager.
      *
-     * Vuforia license keys are always 380 characters long, and look as if they contain mostly
+     * com.vuforia.Vuforia license keys are always 380 characters long, and look as if they contain mostly
      * random data. As an example, here is a example of a fragment of a valid key:
      *      ... yIgIzTqZ4mWjk9wd3cZO9T1axEqzuhxoGlfOOI2dRzKS4T0hQ8kT ...
      * Once you've obtained a license key, copy the string from the Vuforia web site
@@ -118,36 +120,38 @@ public class AutonamousFirst extends LinearOpMode {
 
         // set both motors to 25% power
         numberOfRings = lookToFindRings();
+        moveServo(.3,.08);
         driveit(.5, .5,
                 .5, .5, 1400);
 
         //look to find rings
         if (numberOfRings == 0 || numberOfRings == 4) {
             if (numberOfRings == 0) {
-                driveit(1.0, .0,
-                        1.0, 1.0, 800);
+                driveit(1.0, 1.0,
+                        1.0, 1.0, 1000);
                 //realeasre thew wobwle here
-                ServoPositon(1,1);
-                ServoPositon(1,0);
+                moveServo(.3,.5);
+                driveit(0,0,0,0,1000);
+                moveServo(.5,0.5);
                 driveit(.01, .01,
                         .01, .01, 1000);
-                driveit(-1.0, 1.0,
-                        -1.0, 1.0, 1000);
+                driveit(1.0, -1.0,
+                        -1.0,   1.0, 900);
                 //raiss arm so we dont hit tyhe woble
-                ServoPositon(.5,0);
                 driveit(.01, .01,
                         .01, .01, 1000);
                 driveit(-1., -1.,
-                        -1., -1., 1900);
+                        -1., -1., 1500);
                 //pick up the woblle
-                ServoPositon(1,0);
+                moveServo(.25,.5);
                 driveit(.01, .01,
                         .01, .01, 1000);
-                ServoPositon(1,1);
+                moveServo(.25,.08);
                 driveit(.01, .01,
                         .01, .01, 1000);
-                driveit(1., -1,
-                        1, -1., 1400);
+                driveit(-1., 1,
+                        1, -1., 900);
+                driveit(1,1,1,1,900);
             } else {
 
                 driveit(1.0, 1.0,
@@ -207,10 +211,10 @@ public class AutonamousFirst extends LinearOpMode {
         return numberOfRings;
     }
 
-    private void ServoPositon(double armPosition, double gripPosition) {
+    private void moveServo(double armPosition, double gripPosition) {
         if (opModeIsActive()) {
             armServo.setPosition(Range.clip(armPosition, minPosition, maxPosition));
-            gripServo.setPosition(Range.clip(gripPosition, minPosition, maxPosition));
+            gripServo.setPosition(Range.clip(gripPosition, MIN_GRIP, MAX_GRIP));
         }
     }
 

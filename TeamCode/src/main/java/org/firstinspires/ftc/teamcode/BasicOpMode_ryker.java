@@ -67,6 +67,7 @@ public class BasicOpMode_ryker extends LinearOpMode {
     private Servo gripServo = null;
     double armPosition, gripPosition;
     double MIN_POSITION = 0, MAX_POSITION = 1;
+    double MIN_GRIP= 0.08, MAX_GRIP = .7;
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
@@ -95,7 +96,7 @@ public class BasicOpMode_ryker extends LinearOpMode {
         waitForStart();
         runtime.reset();
         armPosition = .5;                   // set arm to half way up.
-        gripPosition = MAX_POSITION;        // set grip to full open.
+        gripPosition = MAX_GRIP;        // set grip to full open.
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -115,10 +116,10 @@ public class BasicOpMode_ryker extends LinearOpMode {
             // - This uses basic math to combine motions and is easier to drive straight.
             double drive = -gamepad1.left_stick_y;
             double turn = gamepad1.right_stick_x;
-            if (gamepad1.dpad_left && armPosition < MAX_POSITION) armPosition = armPosition + .001;
-            if (gamepad1.dpad_right && armPosition > MIN_POSITION) armPosition = armPosition - .001;
-            if (gamepad1.dpad_up && gripPosition < MAX_POSITION) gripPosition = gripPosition + .001;
-            if (gamepad1.dpad_down && gripPosition > MIN_POSITION) gripPosition = gripPosition - .001;
+            if (gamepad1.dpad_up && armPosition < MAX_POSITION) armPosition = armPosition + .001;
+            if (gamepad1.dpad_down && armPosition > MIN_POSITION) armPosition = armPosition - .001;
+            if (gamepad1.dpad_left && gripPosition < MAX_GRIP) gripPosition = gripPosition + .001;
+            if (gamepad1.dpad_right && gripPosition > MIN_GRIP) gripPosition = gripPosition - .001;
             leftFrontPower = Range.clip(drive + turn - strafe, -1.0, 1.0);            //
             leftBackPower = Range.clip(drive + turn + strafe, -1.0, 1.0);
             rightFrontPower = Range.clip(drive - turn + strafe, -1.0, 1.0);
@@ -143,7 +144,7 @@ public class BasicOpMode_ryker extends LinearOpMode {
 //                    leftBackeDrive.setPower(1);
 //                    rightBackeDrive.setPower(-1);
             armServo.setPosition(Range.clip(armPosition, MIN_POSITION, MAX_POSITION));
-            gripServo.setPosition(Range.clip(gripPosition, MIN_POSITION, MAX_POSITION));
+            gripServo.setPosition(Range.clip(gripPosition, MIN_GRIP, MAX_GRIP));
 //                }
 //            }
             // Show the elapsed game time and wheel power.
