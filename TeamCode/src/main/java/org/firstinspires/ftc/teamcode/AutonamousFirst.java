@@ -10,9 +10,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.Came
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
-import com.vuforia.Vuforia;
 
 import java.util.Date;
 import java.util.List;
@@ -32,15 +32,15 @@ public class AutonamousFirst extends LinearOpMode {
     private DcMotor rightBackeDrive = null;
     private DcMotor intake = null;
     private DcMotor outtake = null;
-    private Servo armServo = null;
+    private DcMotor armMotor = null;
     private Servo gripServo = null;
     private int numberOfRings;
     private static final String TFOD_MODEL_ASSET = "UltimateGoal.tflite";
     private static final String LABEL_FIRST_ELEMENT = "Quad";
     private static final String LABEL_SECOND_ELEMENT = "Single";
-    double armPosition, gripPosition;
-    double minPosition = 0, maxPosition = .7;
-    double MIN_GRIP= 0.08, MAX_GRIP = .5;
+    double gripPosition;
+    double MIN_GRIP = 0.5, MAX_GRIP = 1.0;
+    private int previousTicks = 0;
     /*
      * IMPORTANT: You need to obtain your own license key to use Vuforia. The string below with which
      * 'parameters.vuforiaLicenseKey' is initialized is for illustration only, and will not function.
@@ -76,9 +76,9 @@ public class AutonamousFirst extends LinearOpMode {
         leftBackeDrive = hardwareMap.get(DcMotor.class, "leftBack"); // motor 0
         rightBackeDrive = hardwareMap.get(DcMotor.class, "rightBack"); // motor 1
         intake = hardwareMap.get(DcMotor.class, "intake"); // motor 1
-        outtake = hardwareMap.get(DcMotor.class, "outtake"); // motor 1
-        armServo = hardwareMap.servo.get("arm_servo");
-        gripServo = hardwareMap.servo.get("grip_servo");
+        outtake = hardwareMap.get(DcMotor.class, "outtake"); // motor 2
+        armMotor = hardwareMap.get(DcMotor.class, "arm_motor"); // motor 3
+        gripServo = hardwareMap.servo.get("grip_servo"); // servo 5
 
         leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
@@ -86,11 +86,12 @@ public class AutonamousFirst extends LinearOpMode {
         rightBackeDrive.setDirection(DcMotor.Direction.FORWARD);
         intake.setDirection(DcMotor.Direction.FORWARD);
         outtake.setDirection(DcMotor.Direction.REVERSE);
-
+        armMotor.setDirection(DcMotor.Direction.FORWARD);
+        armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         initVuforia();
         initTfod();
-
+        stopAndResetEncoder();
         /**
          * Activate TensorFlow Object Detection before we wait for the start command.
          * Do it here so that the Camera Stream window will have the TensorFlow annotations visible.
@@ -111,7 +112,10 @@ public class AutonamousFirst extends LinearOpMode {
         telemetry.update();
 
         // wait for start button.
-
+        gripServo.setPosition(Range.clip(.5, MIN_GRIP, MAX_GRIP));
+        //close grip
+        runToTicks(.8,200);
+        //move arm up
         waitForStart();
 
         telemetry.addData("Mode", "running");
@@ -120,52 +124,88 @@ public class AutonamousFirst extends LinearOpMode {
 
         // set both motors to 25% power
         numberOfRings = lookToFindRings();
-        moveServo(.3,.08);
+        sleep(500);
+        //wait
         driveit(.5, .5,
-                .5, .5, 1400);
-
+                .5, .5, 1000);
+        //drive forward
         //look to find rings
         if (numberOfRings == 0 || numberOfRings == 4) {
             if (numberOfRings == 0) {
-                driveit(1.0, 1.0,
-                        1.0, 1.0, 1000);
-                //realeasre thew wobwle here
-                moveServo(.3,.5);
-                driveit(0,0,0,0,1000);
-                moveServo(.5,0.5);
-                driveit(.01, .01,
-                        .01, .01, 1000);
-                driveit(1.0, -1.0,
-                        -1.0,   1.0, 900);
-                //raiss arm so we dont hit tyhe woble
-                driveit(.01, .01,
-                        .01, .01, 1000);
-                driveit(-1., -1.,
-                        -1., -1., 1500);
-                //pick up the woblle
-                moveServo(.25,.5);
-                driveit(.01, .01,
-                        .01, .01, 1000);
-                moveServo(.25,.08);
-                driveit(.01, .01,
-                        .01, .01, 1000);
-                driveit(-1., 1,
-                        1, -1., 900);
-                driveit(1,1,1,1,900);
+                runToTicks(.8,200);
+                driveit(-1,1,1,-1,1200);
+                //strafe to wall
+                runToTicks(.8,200);
+                driveit(1, 1,
+                        1, 1, 1400);
+                //move forward
+                sleep(500);
+                //wait
+                runToTicks(.8,200);
+                //move arm into position
+                sleep(1000);
+                //release grip
+                moveServo(1);
+//                //wait
+              driveit(0, 0, 0, 0, 1000);
+//                //wait
+                runToTicks(.03,300);
+//                //move arm up
+                driveit(.4, .4,
+                        .4, .4, 1000);
+                                //wait
+                driveit(.5, -.5,
+                        -.5, .5, 1900);
+//                //strafe away from woblle zone
+                driveit(-1,-1,-1,-1,300);
+                //move to line
             } else {
-
+                runToTicks(.8,200);
+                driveit(-0.8,0.8,0.8,-0.8,1200);
+                //strafe to wall
+                runToTicks(.8,200);
                 driveit(1.0, 1.0,
-                        1.0, 1.0, 1850);
-                driveit(-1.0, -1.0,
-                        -1.0, -1.0, 700);
+                        1.0, 1.0, 1600);
+                //move forward
+                sleep(500);
+                //wait
+                sleep(1000);
+                //release grip
+                moveServo(1);
+//                //wait
+//
+                driveit(.01, .01,
+                        .01, .01, 1000);
+                //wait
+                driveit(1.0, -1.0,
+                        -1.0, 1.0, 900);
+//                //strafe away from woblle zone
+                //move to line
 
 
             }
         } else {
-            driveit(.175, -.175,
-                    .175, -.175, 4050);
+            runToTicks(.8,200);
             driveit(.99, .99,
-                    .99, .99, 1250);
+                    .99, .99, 2600);
+            runToTicks(.8,200);
+            driveit(1., -1,
+                    -1, 1, 800);
+            runToTicks(.8,200);
+            sleep(500);
+            runToTicks(.03,500);
+            sleep(500);
+            moveServo(.5);
+
+            driveit(1,-1,1,-1,500);
+            driveit(-1,-1,-1,-1,1000);
+//            moveServo(.25,.5);
+//            sleep(50);
+//            moveServo(.25,.08);
+//            moveServo(.3,.08);
+//            driveit(1,1,1,1,1000);
+//            moveServo(.3,.5);
+
 
         }
 
@@ -211,9 +251,33 @@ public class AutonamousFirst extends LinearOpMode {
         return numberOfRings;
     }
 
-    private void moveServo(double armPosition, double gripPosition) {
+
+    private void runToTicks(double speed, int ticks) {
+            armMotor.setTargetPosition(ticks);
+            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            armMotor.setPower(Math.abs(speed));
+            while (opModeIsActive() && armMotor.isBusy()) {
+                telemetry.addData("LFT, RFT", "Running to %7d", ticks);
+                telemetry.addData("LFP, RFP", "Running at %7d",
+                        armMotor.getCurrentPosition()
+                );
+                telemetry.update();
+            }
+
+        }
+
+
+    private void stopAndResetEncoder() {
+        armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    }
+
+    private void runUsingEncoder() {
+        armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
+
+    private void moveServo(double gripPosition) {
         if (opModeIsActive()) {
-            armServo.setPosition(Range.clip(armPosition, minPosition, maxPosition));
             gripServo.setPosition(Range.clip(gripPosition, MIN_GRIP, MAX_GRIP));
         }
     }
@@ -235,16 +299,17 @@ public class AutonamousFirst extends LinearOpMode {
 
             // set motor power to zero to stop motors.
 
-//        leftFrontDrive.setPower(0.0);
-//        leftBackeDrive.setPower(0.0);
-//        rightFrontDrive.setPower(0.0);
-//        rightBackeDrive.setPower(0.0);
+            leftFrontDrive.setPower(0.0);
+            leftBackeDrive.setPower(0.0);
+            rightFrontDrive.setPower(0.0);
+            rightBackeDrive.setPower(0.0);
+            armMotor.setPower(0.0);
         }
 
     }
 
     /**
-     * Initialize the Vuforia localization engine.
+     * Initialize the Vuforia localizati0on engine.
      */
     private void initVuforia() {
         /*

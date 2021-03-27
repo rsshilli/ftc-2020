@@ -36,7 +36,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
-import com.qualcomm.robotcore.hardware.Servo;
 
 /**
  * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
@@ -59,15 +58,16 @@ public class BasicOpMode_ryker extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor leftFrontDrive = null;
     private DcMotor rightFrontDrive = null;
-    private DcMotor leftBackeDrive  = null;
+    private DcMotor leftBackeDrive = null;
     private DcMotor rightBackeDrive = null;
     private DcMotor intake = null;
     private DcMotor outtake = null;
-    private Servo armServo = null;
+    private DcMotor armMotor = null;
     private Servo gripServo = null;
-    double armPosition, gripPosition;
-    double MIN_POSITION = 0, MAX_POSITION = 1;
-    double MIN_GRIP= 0.08, MAX_GRIP = .7;
+    double gripPosition;
+    double MIN_GRIP = 0.5, MAX_GRIP = 1;
+    private int previousTicks = 900;
+
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
@@ -82,7 +82,7 @@ public class BasicOpMode_ryker extends LinearOpMode {
         rightBackeDrive = hardwareMap.get(DcMotor.class, "rightBack"); // motor 1
         intake = hardwareMap.get(DcMotor.class, "intake"); // motor 1
         outtake = hardwareMap.get(DcMotor.class, "outtake"); // motor 1
-        armServo = hardwareMap.servo.get("arm_servo");
+        armMotor = hardwareMap.get(DcMotor.class, "arm_motor");
         gripServo = hardwareMap.servo.get("grip_servo");
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
@@ -92,12 +92,15 @@ public class BasicOpMode_ryker extends LinearOpMode {
         rightBackeDrive.setDirection(DcMotor.Direction.FORWARD);
         intake.setDirection(DcMotor.Direction.FORWARD);
         outtake.setDirection(DcMotor.Direction.REVERSE);
+        armMotor.setDirection(DcMotor.Direction.FORWARD);
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
-        armPosition = .5;                   // set arm to half way up.
-        gripPosition = MAX_GRIP;        // set grip to full open.
-
+//        gripPosition = MAX_GRIP;        // set grip to full open.
+        int armTicks = 900;
+        stopAndResetEncoder();
+        runUsingEncoder();
+//        runToTicks(0.5,armTicks);
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
@@ -106,53 +109,70 @@ public class BasicOpMode_ryker extends LinearOpMode {
             double rightBackPower;
             double leftBackPower;
             double rightFrontPower;
+
             double intakePower;
             double outtakePower;
-
             // helloMyNameIsBob
             double strafe = gamepad1.left_stick_x;
-
             // The left stick Is for forward, backward,  and to turn the robot's front.
             // - This uses basic math to combine motions and is easier to drive straight.
             double drive = -gamepad1.left_stick_y;
             double turn = gamepad1.right_stick_x;
-            if (gamepad1.dpad_up && armPosition < MAX_POSITION) armPosition = armPosition + .001;
-            if (gamepad1.dpad_down && armPosition > MIN_POSITION) armPosition = armPosition - .001;
-            if (gamepad1.dpad_left && gripPosition < MAX_GRIP) gripPosition = gripPosition + .001;
-            if (gamepad1.dpad_right && gripPosition > MIN_GRIP) gripPosition = gripPosition - .001;
-            leftFrontPower = Range.clip(drive + turn - strafe, -1.0, 1.0);            //
-            leftBackPower = Range.clip(drive + turn + strafe, -1.0, 1.0);
-            rightFrontPower = Range.clip(drive - turn + strafe, -1.0, 1.0);
-            rightBackPower = Range.clip(drive - turn - strafe, -1.0, 1.0);
+            if (gamepad1.dpad_up ) armTicks = armTicks + 30;
+            if (gamepad1.dpad_down) armTicks = armTicks - 30;
+            if (gamepad1.dpad_left && gripPosition < MAX_GRIP) gripPosition = gripPosition + .01;
+            if (gamepad1.dpad_right && gripPosition > MIN_GRIP) gripPosition = gripPosition - .01;
+            leftFrontPower = Range.clip(drive + turn + strafe, -1.0, 1.0);            //
+            leftBackPower = Range.clip(drive + turn - strafe, -1.0, 1.0);
+            rightFrontPower = Range.clip(drive - turn - strafe, -1.0, 1.0);
+            rightBackPower = Range.clip(drive - turn + strafe, -1.0, 1.0);
             // someVariable = 1 < 0 ? answerIfTrue : answerIfFalse;
             double leftBumperPower = gamepad1.left_bumper ? 1 : 0;
             double rightBumperPower = gamepad1.right_bumper ? 1 : 0;
             intakePower = Range.clip(gamepad1.left_trigger - leftBumperPower, -1.0, 1.0);
             outtakePower = Range.clip(gamepad1.right_trigger - rightBumperPower, -1.0, 1.0);
-
-            
             // Send calculated power to wheels
             leftFrontDrive.setPower(leftFrontPower);
             rightFrontDrive.setPower(rightFrontPower);
             leftBackeDrive.setPower(leftBackPower);
             rightBackeDrive.setPower(rightBackPower);
-//                // intake
+//                // intake and outtake power
             intake.setPower(intakePower);
             outtake.setPower(outtakePower);
-//                    leftFrontDrive.setPower(1);
-//                    rightFrontDrive.setPower(-1);
-//                    leftBackeDrive.setPower(1);
-//                    rightBackeDrive.setPower(-1);
-            armServo.setPosition(Range.clip(armPosition, MIN_POSITION, MAX_POSITION));
+            runToTicks(0.6, armTicks);
             gripServo.setPosition(Range.clip(gripPosition, MIN_GRIP, MAX_GRIP));
-//                }
-//            }
+
             // Show the elapsed game time and wheel power.
-            telemetry.addData("arm servo", "position=" + armPosition + "  actual=" + armServo.getPosition());
+            telemetry.addData("arm motor", "position=" + armTicks + "  actual=" + armMotor.getPower());
             telemetry.addData("grip servo", "position=" + gripPosition + "    actual=" + gripServo.getPosition());
             telemetry.addData("Status", "Run Time: " + runtime.toString() + "RightY :" + gamepad1.right_stick_y + "RightX :" + gamepad1.right_stick_x);
             telemetry.addData("Motors", "left (%.2f), right (%.2f), leftt (%.2f) outtake (%.2f)", leftFrontPower, rightFrontPower, gamepad1.left_trigger, outtakePower);
             telemetry.update();
         }
     }
+
+
+    private void runToTicks(double speed, int ticks) {
+        if (this.previousTicks != ticks) {
+            armMotor.setTargetPosition(ticks);
+            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            armMotor.setPower(Math.abs(speed));
+            while (opModeIsActive() && armMotor.isBusy()) {
+                telemetry.addData("LFT, RFT", "Running to %7d", ticks);
+                telemetry.addData("LFP, RFP", "Running at %7d",
+                        armMotor.getCurrentPosition()
+                           );
+                telemetry.update();
+            }
+            this.previousTicks=ticks;
+        }
+    }
+    private void stopAndResetEncoder() {
+        armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    }
+
+    private void runUsingEncoder() {
+        armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
 }
