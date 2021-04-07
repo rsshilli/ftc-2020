@@ -114,7 +114,7 @@ public class AutonamousFirst extends LinearOpMode {
         // wait for start button.
         gripServo.setPosition(Range.clip(.5, MIN_GRIP, MAX_GRIP));
         //close grip
-        runToTicks(.8,200);
+        runToTicks(.8, 200);
         //move arm up
         waitForStart();
 
@@ -125,6 +125,7 @@ public class AutonamousFirst extends LinearOpMode {
         // set both motors to 25% power
         numberOfRings = lookToFindRings();
         sleep(500);
+        numberOfRings = 4;
         //wait
         driveit(.5, .5,
                 .5, .5, 1000);
@@ -132,74 +133,79 @@ public class AutonamousFirst extends LinearOpMode {
         //look to find rings
         if (numberOfRings == 0 || numberOfRings == 4) {
             if (numberOfRings == 0) {
-                runToTicks(.8,200);
-                driveit(-1,1,1,-1,1200);
+                runToTicks(.8, 200);
+                driveit(-1, 1, 1, -1, 1200);
                 //strafe to wall
-                runToTicks(.8,200);
+                runToTicks(.8, 200);
                 driveit(1, 1,
                         1, 1, 1400);
                 //move forward
                 sleep(500);
                 //wait
-                runToTicks(.8,200);
-                //move arm into position
+                runToTicks(.08, 500);
+                //move arm into position000
                 sleep(1000);
                 //release grip
                 moveServo(1);
 //                //wait
-              driveit(0, 0, 0, 0, 1000);
+                driveit(0, 0, 0, 0, 1000);
 //                //wait
-                runToTicks(.03,300);
+                runToTicks(.03, 300);
 //                //move arm up
                 driveit(.4, .4,
                         .4, .4, 1000);
-                                //wait
+                //wait
                 driveit(.5, -.5,
                         -.5, .5, 1900);
 //                //strafe away from woblle zone
-                driveit(-1,-1,-1,-1,300);
+                driveit(-1, -1, -1, -1, 300);
                 //move to line
+                runToTicks(.6, 50);
+                moveServo(.6);
+
             } else {
-                runToTicks(.8,200);
-                driveit(-0.8,0.8,0.8,-0.8,1200);
+                runToTicks(.8, 200);
+                driveit(-0.8, 0.8, 0.8, -0.8, 1200);
                 //strafe to wall
-                runToTicks(.8,200);
+                runToTicks(.8, 200);
                 driveit(1.0, 1.0,
-                        1.0, 1.0, 1600);
+                        1.0, 1.0, 2400);
                 //move forward
                 sleep(500);
                 //wait
                 sleep(1000);
+                driveit(-1.0, -1.0,
+                        1.0, 1.0, 500);
+                sleep(1000);
                 //release grip
                 moveServo(1);
 //                //wait
+                sleep(1000);
 //
-                driveit(.01, .01,
-                        .01, .01, 1000);
+                driveit(1.0, 1.0,
+                        -1.0, -1.0, 500);
+                sleep(500);
                 //wait
-                driveit(1.0, -1.0,
-                        -1.0, 1.0, 900);
-//                //strafe away from woblle zone
+                driveit(-1.0, -1.0,
+                        -1.0, -1.0, 600);
+//                //strafe back from woblle zone
                 //move to line
-
+                runToTicks(.6, 50);
+                moveServo(.6);
 
             }
         } else {
-            runToTicks(.8,200);
+            runToTicks(.8, 200);
             driveit(.99, .99,
-                    .99, .99, 2600);
-            runToTicks(.8,200);
-            driveit(1., -1,
-                    -1, 1, 800);
-            runToTicks(.8,200);
+                    .99, .99, 1600);
+            runToTicks(.8, 100);
             sleep(500);
-            runToTicks(.03,500);
+            moveServo(1);
             sleep(500);
-            moveServo(.5);
-
-            driveit(1,-1,1,-1,500);
-            driveit(-1,-1,-1,-1,1000);
+            driveit(-1, -1, -1, -1, 200);
 //            moveServo(.25,.5);
+            runToTicks(.6, 50);
+            moveServo(.6);
 //            sleep(50);
 //            moveServo(.25,.08);
 //            moveServo(.3,.08);
@@ -208,6 +214,7 @@ public class AutonamousFirst extends LinearOpMode {
 
 
         }
+
 
 //        driveit(1.0, 1.0,
 //                1.0, 1.0, 2000);
@@ -253,18 +260,18 @@ public class AutonamousFirst extends LinearOpMode {
 
 
     private void runToTicks(double speed, int ticks) {
-            armMotor.setTargetPosition(ticks);
-            armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            armMotor.setPower(Math.abs(speed));
-            while (opModeIsActive() && armMotor.isBusy()) {
-                telemetry.addData("LFT, RFT", "Running to %7d", ticks);
-                telemetry.addData("LFP, RFP", "Running at %7d",
-                        armMotor.getCurrentPosition()
-                );
-                telemetry.update();
-            }
-
+        armMotor.setTargetPosition(ticks);
+        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armMotor.setPower(Math.abs(speed));
+        while (opModeIsActive() && armMotor.isBusy()) {
+            telemetry.addData("LFT, RFT", "Running to %7d", ticks);
+            telemetry.addData("LFP, RFP", "Running at %7d",
+                    armMotor.getCurrentPosition()
+            );
+            telemetry.update();
         }
+
+    }
 
 
     private void stopAndResetEncoder() {

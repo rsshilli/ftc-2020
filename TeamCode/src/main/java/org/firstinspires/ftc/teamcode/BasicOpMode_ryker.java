@@ -66,7 +66,7 @@ public class BasicOpMode_ryker extends LinearOpMode {
     private Servo gripServo = null;
     double gripPosition;
     double MIN_GRIP = 0.5, MAX_GRIP = 1;
-    private int previousTicks = 900;
+    private int previousTicks = 0;
 
     @Override
     public void runOpMode() {
@@ -90,14 +90,15 @@ public class BasicOpMode_ryker extends LinearOpMode {
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         leftBackeDrive.setDirection(DcMotor.Direction.REVERSE);
         rightBackeDrive.setDirection(DcMotor.Direction.FORWARD);
-        intake.setDirection(DcMotor.Direction.FORWARD);
+        intake.setDirection(DcMotor.Direction.REVERSE);
         outtake.setDirection(DcMotor.Direction.REVERSE);
         armMotor.setDirection(DcMotor.Direction.FORWARD);
+        armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
 //        gripPosition = MAX_GRIP;        // set grip to full open.
-        int armTicks = 900;
+        int armTicks = 0;
         stopAndResetEncoder();
         runUsingEncoder();
 //        runToTicks(0.5,armTicks);
@@ -109,7 +110,6 @@ public class BasicOpMode_ryker extends LinearOpMode {
             double rightBackPower;
             double leftBackPower;
             double rightFrontPower;
-
             double intakePower;
             double outtakePower;
             // helloMyNameIsBob
@@ -118,8 +118,14 @@ public class BasicOpMode_ryker extends LinearOpMode {
             // - This uses basic math to combine motions and is easier to drive straight.
             double drive = -gamepad1.left_stick_y;
             double turn = gamepad1.right_stick_x;
-            if (gamepad1.dpad_up ) armTicks = armTicks + 30;
+            if (gamepad1.dpad_up) armTicks = armTicks + 30;
             if (gamepad1.dpad_down) armTicks = armTicks - 30;
+            if (gamepad1.y) {
+                runToTicks(.5, -500, true);
+                stopAndResetEncoder();
+//                runUsingEncoder();
+                armTicks = 0;
+            }
             if (gamepad1.dpad_left && gripPosition < MAX_GRIP) gripPosition = gripPosition + .01;
             if (gamepad1.dpad_right && gripPosition > MIN_GRIP) gripPosition = gripPosition - .01;
             leftFrontPower = Range.clip(drive + turn + strafe, -1.0, 1.0);            //
@@ -139,7 +145,7 @@ public class BasicOpMode_ryker extends LinearOpMode {
 //                // intake and outtake power
             intake.setPower(intakePower);
             outtake.setPower(outtakePower);
-            runToTicks(0.6, armTicks);
+            runToTicks(0.6, armTicks, false);
             gripServo.setPosition(Range.clip(gripPosition, MIN_GRIP, MAX_GRIP));
 
             // Show the elapsed game time and wheel power.
@@ -152,8 +158,8 @@ public class BasicOpMode_ryker extends LinearOpMode {
     }
 
 
-    private void runToTicks(double speed, int ticks) {
-        if (this.previousTicks != ticks) {
+    private void runToTicks(double speed, int ticks, boolean ignorePrevious) {
+        if (ignorePrevious || this.previousTicks != ticks) {
             armMotor.setTargetPosition(ticks);
             armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             armMotor.setPower(Math.abs(speed));
@@ -161,12 +167,17 @@ public class BasicOpMode_ryker extends LinearOpMode {
                 telemetry.addData("LFT, RFT", "Running to %7d", ticks);
                 telemetry.addData("LFP, RFP", "Running at %7d",
                         armMotor.getCurrentPosition()
-                           );
+                );
                 telemetry.update();
             }
-            this.previousTicks=ticks;
+            if (!ignorePrevious) {
+                this.previousTicks = ticks;
+            } else {
+                this.previousTicks = 0;
+            }
         }
     }
+
     private void stopAndResetEncoder() {
         armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
